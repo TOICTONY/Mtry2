@@ -489,6 +489,7 @@ default_desp = {'AS_DOCUMENT': 'Default type of Telegram file upload. Default is
                 'LEECH_FILENAME_SUFFIX': 'Add custom word suffix to leeched file name. Str',
                 'LEECH_FILENAME_CAPTION': 'Add custom word caption to leeched file/vedios. Str',
                 'LEECH_FILENAME_REMNAME': 'Remove custom word from the leeched file name. Str',
+                'LEECH_FILENAME_METADATA_EDIT': 'Add custom word from the leeched file name. Str',
                 'LOGIN_PASS': 'Permanent pass for user to skip the token system',
                 'TOKEN_TIMEOUT': 'Token timeout for each group member in sec. Int',
                 'DEBRID_LINK_API': 'Set debrid-link.com API for 172 Supported Hosters Leeching Support. Str',

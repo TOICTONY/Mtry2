@@ -168,6 +168,8 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         lremname = 'Not Exists' if (val:=user_dict.get('lremname', config_dict.get('LEECH_FILENAME_REMNAME', ''))) == '' else val
         buttons.ibutton(f"{'✅️' if lremname != 'Not Exists' else ''} Leech Remname", f"userset {user_id} lremname")
 
+        buttons.ibutton("Metadata", f"userset {user_id} metadata")
+
         buttons.ibutton("Leech Dump", f"userset {user_id} ldump")
         ldump = 'Not Exists' if (val:=user_dict.get('ldump', '')) == '' else len(val)
 

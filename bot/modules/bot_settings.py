@@ -181,6 +181,10 @@ async def load_config():
     if len(LEECH_FILENAME_REMNAME) == 0:
         LEECH_FILENAME_REMNAME = ''
 
+    LEECH_METADATA_EDIT = environ.get('LEECH_FILENAME_METADATA_EDIT', '')
+    if len(LEECH_FILENAME_METADATA_EDIT) == 0:
+        LEECH_FILENAME_METADATA_EDIT = ''
+
     MIRROR_FILENAME_PREFIX = environ.get('MIRROR_FILENAME_PREFIX', '')
     if len(MIRROR_FILENAME_PREFIX) == 0:
         MIRROR_FILENAME_PREFIX = ''
@@ -192,6 +196,10 @@ async def load_config():
     MIRROR_FILENAME_REMNAME = environ.get('MIRROR_FILENAME_REMNAME', '')
     if len(MIRROR_FILENAME_REMNAME) == 0:
         MIRROR_FILENAME_REMNAME = ''
+
+    MIRROR_METADATA_EDIT = environ.get('MIRROR_FILENAME_METADATA_EDIT', '')
+    if len(MIRROR_FILENAME_METADATA_EDIT) == 0:
+        MIRROR_FILENAME_METADATA_EDIT = ''
         
     SEARCH_PLUGINS = environ.get('SEARCH_PLUGINS', '')
     if len(SEARCH_PLUGINS) == 0:

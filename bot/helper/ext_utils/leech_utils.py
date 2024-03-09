@@ -342,8 +342,7 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
             modified_audio_name = file.audio_name
             modified_subtitle_name = file.subtitle_name
 
-        # Append metadata to file name
-        file_ = f"{file_} [{metadata_edit}]" if metadata_edit else file_
+        file_ = f"{file_} [{metadata_edit}]" if metadata_edit else file_ 
 
         # Return modified file names
         return modified_video_name, modified_audio_name, modified_subtitle_name, file_

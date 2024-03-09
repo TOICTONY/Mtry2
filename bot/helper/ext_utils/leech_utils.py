@@ -361,7 +361,7 @@ async def change_metadata_title(user_id, file_):
         return file_
 
 
-async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
+async def upload(self, user_id, file_, dirpath, metadata):  # Add metadata parameter
     cap_mono, file_ = await self.__prepare_file(file_, dirpath)
     if metadata:
         # Change metadata title using FFMPEG
@@ -370,7 +370,7 @@ async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
         if new_file:
             file_ = new_file
             if s is not None:
-    s = s.replace("&", "&amp;")
+                s = s.replace("&", "&amp;")
 
     if cap_mono is None or file_ is None:
         print("Error: __prepare_file returned None.")
@@ -378,8 +378,9 @@ async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
 
     # Call format_filename with the metadata argument
     file_, cap_mono = await format_filename(file_, user_id, dirpath=dirpath, metadata=metadata)
-        
 
+
+       
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)
     th_html = f"📌 <h4>{ospath.basename(up_path)}</h4><br>📇 <b>Total Screenshots:</b> {ss_no}<br><br>"

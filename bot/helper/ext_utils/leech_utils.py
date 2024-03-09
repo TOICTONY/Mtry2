@@ -1,4 +1,3 @@
-import shlex
 from hashlib import md5
 from time import strftime, gmtime, time
 from re import sub as re_sub, search as re_search
@@ -18,7 +17,6 @@ from bot.modules.mediainfo import parseinfo
 from bot.helper.ext_utils.bot_utils import cmd_exec, sync_to_async, get_readable_file_size, get_readable_time
 from bot.helper.ext_utils.fs_utils import ARCH_EXT, get_mime_type
 from bot.helper.ext_utils.telegraph_helper import telegraph
-from asyncio.subprocess import PIPE
 
 
 async def is_multi_streams(path):
@@ -329,41 +327,9 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
     
-    async def leech_file(user_id, file):
-    if metadata:
-        modified_video_name, modified_audio_name, modified_subtitle_name, file_ = await leech_file(user_id, file_)
+   if metadata:
+        file_ = f"{file_} [{lmetadata}]"
 
-    async def change_metadata_title(file_, user_id):
-        # Define the FFMPEG command to change metadata title
-        ffmpeg_cmd = [
-            "ffmpeg", "-i", file_,
-            "-metadata", f"title={modified_video_name}",
-            "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
-            "-y", f"{file_}.tmp"
-        ]
-
-        # Execute FFMPEG command asynchronously
-        process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
-        _, stderr = await process.communicate()
-
-        if process.returncode != 0:
-            # FFMPEG command failed, handle the error
-            error_message = stderr.decode().strip()
-            LOGGER.error(f"FFMPEG metadata title change failed: {error_message}")
-            return None
-        else:
-            # FFMPEG command succeeded, rename the file
-            os.rename(f"{file_}.tmp", file_)
-            return file_
-
-    if metadata:
-        # Change metadata title using FFMPEG
-        new_file = await change_metadata_title(file_, user_id)
-        if new_file:
-            # Successfully changed metadata title, update file_ variable
-            file_ = new_file
-
-    # Return the formatted file name
     return file_, cap_mono
     
 async def get_ss(up_path, ss_no):

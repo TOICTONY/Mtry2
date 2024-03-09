@@ -11,7 +11,6 @@ from asyncio import create_subprocess_exec, create_task, gather, Semaphore
 from asyncio.subprocess import PIPE
 from telegraph import upload_file
 from langcodes import Language
-from path.to.other.module import leech_file
 
 from bot import bot_cache, LOGGER, MAX_SPLIT_SIZE, config_dict, user_data
 from bot.modules.mediainfo import parseinfo
@@ -358,7 +357,7 @@ async def change_metadata_title(user_id, file_, modified_video_name, modified_au
         os.rename(f"{file_}.tmp", file_)
         return file_
 
-async def leech_file(user_id, file_):
+await leech_file(user_id, file_):
     if metadata:
         modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
         file_ = await change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)

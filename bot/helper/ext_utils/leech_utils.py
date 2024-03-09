@@ -335,14 +335,12 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
 
 async def change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name):
     # Define the FFMPEG command to change metadata title
-    ffmpeg_cmd = [
-    "ffmpeg", "-i", file_, "-map", "0",
+    ffmpeg_cmd = ["ffmpeg", "-i", file_, "-map", "0",
     "-metadata", f"title={modified_video_name}",
     "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
     "-y", f"{file_}.tmp"
     ]
 
-    # Execute FFMPEG command asynchronously
     process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
     _, stderr = await process.communicate()
 
@@ -364,7 +362,7 @@ async def get_modified_metadata_names(user_id):
     modified_subtitle_name = "Modified Subtitle Name"
     return modified_video_name, modified_audio_name, modified_subtitle_name
 
-async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
+async def upload_file(self, user_id, file_, dirpath):  # Add user_id parameter
     cap_mono, file_ = await self.__prepare_file(file_, dirpath)
     if metadata:
         # Change metadata title using FFMPEG

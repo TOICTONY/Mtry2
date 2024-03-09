@@ -367,7 +367,7 @@ async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)
     th_html = f"📌 <h4>{ospath.basename(up_path)}</h4><br>📇 <b>Total Screenshots:</b> {ss_no}<br><br>"
     up_sem = Semaphore(25)
-    async def teleile(thumb):f
+    async def telefile(thumb):
         async with up_sem:
             tele_id = await sync_to_async(upload_file, ospath.join(thumbs_path, thumb))
             return tele_id[0], tstamps[thumb]

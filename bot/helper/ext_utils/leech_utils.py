@@ -11,6 +11,7 @@ from asyncio import create_subprocess_exec, create_task, gather, Semaphore
 from asyncio.subprocess import PIPE
 from telegraph import upload_file
 from langcodes import Language
+from path.to.other.module import leech_file
 
 from bot import bot_cache, LOGGER, MAX_SPLIT_SIZE, config_dict, user_data
 from bot.modules.mediainfo import parseinfo
@@ -326,32 +327,33 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                 elif len(args) == 1:
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
-        
+   
+   async def leech_file(user_id, file_, metadata=False):
     if metadata:
-        modified_video_name, modified_audio_name, modified_subtitle_name, file_ = await leech_file(user_id, file_)
+        modified_video_name, modified_audio_name, modified_subtitle_name, file_ = await change_metadata_title(user_id, file_)
 
-    async def change_metadata_title(file_, user_id):
-        # Define the FFMPEG command to change metadata title
-        ffmpeg_cmd = [
-            "ffmpeg", "-i", file_,
-            "-metadata", f"title={modified_video_name}",
-            "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
-            "-y", f"{file_}.tmp"
-        ]
+async def change_metadata_title(user_id, file_):
+    # Define the FFMPEG command to change metadata title
+    ffmpeg_cmd = [
+        "ffmpeg", "-i", file_,
+        "-metadata", f"title={modified_video_name}",
+        "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
+        "-y", f"{file_}.tmp"
+    ]
 
-        # Execute FFMPEG command asynchronously
-        process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
-        _, stderr = await process.communicate()
+    # Execute FFMPEG command asynchronously
+    process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
+    _, stderr = await process.communicate()
 
-        if process.returncode != 0:
-            # FFMPEG command failed, handle the error
-            error_message = stderr.decode().strip()
-            LOGGER.error(f"FFMPEG metadata title change failed: {error_message}")
-            return None
-        else:
-            # FFMPEG command succeeded, rename the file
-            os.rename(f"{file_}.tmp", file_)
-            return file_
+    if process.returncode != 0:
+        # FFMPEG command failed, handle the error
+        error_message = stderr.decode().strip()
+        LOGGER.error(f"FFMPEG metadata title change failed: {error_message}")
+        return None
+    else:
+        # FFMPEG command succeeded, rename the file
+        os.rename(f"{file_}.tmp", file_)
+        return file_
 
     if metadata:
         # Change metadata title using FFMPEG

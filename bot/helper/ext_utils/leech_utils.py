@@ -331,6 +331,8 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
     if metadata:
         modified_video_name, modified_audio_name, modified_subtitle_name, file_ = await change_metadata_title(user_id, file_)
 
+    return file_, cap_mono  # Return file_ and cap_mono regardless of the metadata flag
+
 async def change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name):
     # Define the FFMPEG command to change metadata title
     ffmpeg_cmd = [

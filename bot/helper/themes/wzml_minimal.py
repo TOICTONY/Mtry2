@@ -300,6 +300,7 @@ class WZMLStyle:
 ┠ ▸<b>Ⓟ Prefix :</b> <code>{MPREFIX}</code>
 ┠ ▸<b>Ⓢ Suffix :</b> <code>{MSUFFIX}</code>
 ┠ ▸<b>🌈 Remname :</b> <code>{MREMNAME}</code>
+┠ ▸<b>✍️ Metadata edit :</b> <code>{MMETADATA}</code>
 ┠ ▸<b>🧿 DDL Server(s) :</b> <i>{DDL_SERVER}</i>
 ┠ ▸<b>🎀 RClone :</b> <i>{RCLONE}</i>
 ┠ ▸<b>📮 User TD :</b> <i>{TMODE}</i>
@@ -319,6 +320,8 @@ class WZMLStyle:
 ┠ ▸<b>Ⓟ Prefix :</b> <code>{LPREFIX}</code>
 ┠ ▸<b>Ⓢ Suffix :</b> <code>{LSUFFIX}</code>
 ┠ ▸<b>📦 Dump :</b> <code>{LDUMP}</code>
+┠ ▸<b>✍️ Metadata edit :</b> <code>{LMETADATA}</code>
 ╰ ▸<b>🌈 Remname :</b> <code>{LREMNAME}</code>
+
 
 <a href="https://t.me/+CLMp3nb8MQE5N2Jl"><b> 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗕𝘆 PRIVATE_KING</b></a>'''

@@ -369,6 +369,8 @@ async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
         new_file = await change_metadata_title(user_id, file_)
         if new_file:
             file_ = new_file
+            if s is not None:
+    s = s.replace("&", "&amp;")
 
     if cap_mono is None or file_ is None:
         print("Error: __prepare_file returned None.")

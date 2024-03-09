@@ -287,11 +287,12 @@ class TgUploader:
                 LOGGER.error(f"Failed To Send in User Dump:\n{str(err)}")
 
     async def upload(self, o_files, m_size, size):
-    await self.__user_settings()
+    await self.__user_settings()  # Ensure proper indentation here
     res = await self.__msg_to_reply()
     if not res:
         return
     isDeleted = False
+    # Other code follows...
     for dirpath, _, files in sorted(await sync_to_async(walk, self.__path)):
         if dirpath.endswith('/yt-dlp-thumb'):
             continue

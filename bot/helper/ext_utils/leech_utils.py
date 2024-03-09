@@ -365,7 +365,7 @@ async def get_modified_metadata_names(user_id):
 
 async def upload(self, user_id, file_, dirpath, metadata=False):
     cap_mono, file_ = await self.__prepare_file(file_, dirpath)
-     
+    
     if metadata:
         modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
         new_file = await change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)
@@ -373,7 +373,7 @@ async def upload(self, user_id, file_, dirpath, metadata=False):
             file_ = new_file
 
     if cap_mono is None or file_ is None:
-        print("Error: __prepare_file returned None.")
+        LOGGER.error("Error: __prepare_file returned None.")
         return
         
 

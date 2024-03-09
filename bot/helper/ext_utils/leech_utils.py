@@ -247,8 +247,8 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
     prefix = config_dict[f'{ctag}_FILENAME_PREFIX'] if (val:=user_dict.get(f'{ftag}prefix', '')) == '' else val
     remname = config_dict[f'{ctag}_FILENAME_REMNAME'] if (val:=user_dict.get(f'{ftag}remname', '')) == '' else val
     suffix = config_dict[f'{ctag}_FILENAME_SUFFIX'] if (val:=user_dict.get(f'{ftag}suffix', '')) == '' else val
-    lcaption = config_dict['LEECH_FILENAME_CAPTION'] if (val:=user_dict.get('lcaption', '')) == '' else val
     metadata = config_dict[f'{ctag}_LEECH_FILENAME_METADATA_EDIT'] if (val:=user_dict.get(f'{ftag}metadata', '')) == '' else val
+    lcaption = config_dict['LEECH_FILENAME_CAPTION'] if (val:=user_dict.get('lcaption', '')) == '' else val
  
     prefile_ = file_
     file_ = re_sub(r'www\S+', '', file_)
@@ -326,17 +326,48 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                 elif len(args) == 1:
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
-    
-   if metadata:
-        file_ = f"{file_} [{lmetadata}]"
+        
+    if metadata:
+        modified_video_name, modified_audio_name, modified_subtitle_name, file_ = await leech_file(user_id, file_)
 
+    async def change_metadata_title(file_, user_id):
+        # Define the FFMPEG command to change metadata title
+        ffmpeg_cmd = [
+            "ffmpeg", "-i", file_,
+            "-metadata", f"title={modified_video_name}",
+            "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
+            "-y", f"{file_}.tmp"
+        ]
+
+        # Execute FFMPEG command asynchronously
+        process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
+        _, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            # FFMPEG command failed, handle the error
+            error_message = stderr.decode().strip()
+            LOGGER.error(f"FFMPEG metadata title change failed: {error_message}")
+            return None
+        else:
+            # FFMPEG command succeeded, rename the file
+            os.rename(f"{file_}.tmp", file_)
+            return file_
+
+    if metadata:
+        # Change metadata title using FFMPEG
+        new_file = await change_metadata_title(file_, user_id)
+        if new_file:
+            # Successfully changed metadata title, update file_ variable
+            file_ = new_file
+
+    # Return the formatted file name
     return file_, cap_mono
     
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)
     th_html = f"📌 <h4>{ospath.basename(up_path)}</h4><br>📇 <b>Total Screenshots:</b> {ss_no}<br><br>"
     up_sem = Semaphore(25)
-    async def telefile(thumb):
+    async def teleile(thumb):f
         async with up_sem:
             tele_id = await sync_to_async(upload_file, ospath.join(thumbs_path, thumb))
             return tele_id[0], tstamps[thumb]

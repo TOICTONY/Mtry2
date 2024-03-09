@@ -328,19 +328,19 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
    
- if metadata:
+    if metadata:
         modified_video_name, modified_audio_name, modified_subtitle_name, file_ = await change_metadata_title(user_id, file_)
 
-async def change_metadata_title(user_id, file_):
+async def change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name):
     # Define the FFMPEG command to change metadata title
     ffmpeg_cmd = [
-    "ffmpeg", "-i", file_, "-map", "0",
-    "-metadata", f"title={modified_video_name}",
-    "-metadata", f"title={modified_audio_name}",
-    "-metadata", f"title={modified_subtitle_name}",
-    "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
-    "-y", f"{file_}.tmp"
-  ]
+        "ffmpeg", "-i", file_, "-map", "0",
+        "-metadata", f"title={modified_video_name}",
+        "-metadata", f"title={modified_audio_name}",
+        "-metadata", f"title={modified_subtitle_name}",
+        "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
+        "-y", f"{file_}.tmp"
+    ]
 
     # Execute FFMPEG command asynchronously
     process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
@@ -355,24 +355,35 @@ async def change_metadata_title(user_id, file_):
         # FFMPEG command succeeded, rename the file
         os.rename(f"{file_}.tmp", file_)
         return file_
-        
+
+async def leech_file(user_id, file_):
+    if metadata:
+        modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
+        file_ = await change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)
+
+    return file_, cap_mono  # Return file_ and cap_mono regardless of the metadata flag
+
+async def get_modified_metadata_names(user_id):
+    # Here you can implement the logic to get modified metadata names based on user_id
+    # For example, querying a database or processing some user-specific data
+    modified_video_name = "Modified Video Name"
+    modified_audio_name = "Modified Audio Name"
+    modified_subtitle_name = "Modified Subtitle Name"
+    return modified_video_name, modified_audio_name, modified_subtitle_name
+
+async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
+    cap_mono, file_ = await self.__prepare_file(file_, dirpath)
     if metadata:
         # Change metadata title using FFMPEG
-       new_file = await change_metadata_title(user_id, file_)
-    if new_file:
-        file_ = new_file
+        modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
+        new_file = await change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)
+        if new_file:
+            file_ = new_file
 
-    # Return the formatted file name
-    return file_, cap_mono
-
-async def upload(self, file_, dirpath):
-    # Your existing code here...
-    cap_mono, file_ = await self.__prepare_file(file_, dirpath)
     if cap_mono is None or file_ is None:
-        # Handle the case where __prepare_file returns None
-        # For example, print an error message and return early
         print("Error: __prepare_file returned None.")
         return
+
         
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)

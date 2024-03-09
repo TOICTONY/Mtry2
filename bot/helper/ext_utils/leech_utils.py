@@ -357,7 +357,7 @@ async def change_metadata_title(user_id, file_, modified_video_name, modified_au
         os.rename(f"{file_}.tmp", file_)
         return file_
 
-await leech_file(user_id, file_):
+await leech_file(user_id, file_)
     if metadata:
         modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
         file_ = await change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)

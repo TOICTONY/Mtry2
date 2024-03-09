@@ -1,3 +1,4 @@
+import shlex
 from hashlib import md5
 from time import strftime, gmtime, time
 from re import sub as re_sub, search as re_search
@@ -17,6 +18,7 @@ from bot.modules.mediainfo import parseinfo
 from bot.helper.ext_utils.bot_utils import cmd_exec, sync_to_async, get_readable_file_size, get_readable_time
 from bot.helper.ext_utils.fs_utils import ARCH_EXT, get_mime_type
 from bot.helper.ext_utils.telegraph_helper import telegraph
+from asyncio.subprocess import PIPE
 
 
 async def is_multi_streams(path):
@@ -326,38 +328,44 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                 elif len(args) == 1:
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
-        return file_, cap_mono
     
     async def leech_file(user_id, file):
     if metadata:
-    metadata_edit = user_settings[user_id].get('lmetadata')
-    # More code here
-    
-    if metadata_edit:
-        # Modify file names based on metadata
-        modified_video_title_name = file.video_title + " - " + metadata_edit
-        modified_audio_title_name = file.audio_title + " - " + metadata_edit
-        modified_subtitle_title_name = file.subtitle_tile + " - " + metadata_edit
-        # Do further processing or output customization as needed
-    else:
-        # Use default file names if no metadata provided
-        modified_video_title_name = file.video_title
-        modified_audio_title_name = file.audio_title
-        modified_subtitle_title_name = file.subtitle_title
-
-    # Append metadata to file name
-    file_ = f"{file_} [{metadata_edit}]" if metadata_edit else file_
-
-    # Return modified file names
-    return modified_video_name, modified_audio_name, modified_subtitle_name, file_
-
-async def format_filename(file_, user_id, dirpath=None, isMirror=False):
-    # Your existing code for formatting the filename goes here
-
-    # Example usage of leech_file function
-    if metadata:
         modified_video_name, modified_audio_name, modified_subtitle_name, file_ = await leech_file(user_id, file_)
 
+    async def change_metadata_title(file_, user_id):
+        # Define the FFMPEG command to change metadata title
+        ffmpeg_cmd = [
+            "ffmpeg", "-i", file_,
+            "-metadata", f"title={modified_video_name}",
+            "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
+            "-y", f"{file_}.tmp"
+        ]
+
+        # Execute FFMPEG command asynchronously
+        process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
+        _, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            # FFMPEG command failed, handle the error
+            error_message = stderr.decode().strip()
+            LOGGER.error(f"FFMPEG metadata title change failed: {error_message}")
+            return None
+        else:
+            # FFMPEG command succeeded, rename the file
+            os.rename(f"{file_}.tmp", file_)
+            return file_
+
+    if metadata:
+        # Change metadata title using FFMPEG
+        new_file = await change_metadata_title(file_, user_id)
+        if new_file:
+            # Successfully changed metadata title, update file_ variable
+            file_ = new_file
+
+    # Return the formatted file name
+    return file_, cap_mono
+    
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)
     th_html = f"📌 <h4>{ospath.basename(up_path)}</h4><br>📇 <b>Total Screenshots:</b> {ss_no}<br><br>"

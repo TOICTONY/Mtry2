@@ -362,7 +362,16 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
 
     # Return the formatted file name
     return file_, cap_mono
-    
+
+async def upload(self, file_, dirpath):
+    # Your existing code here...
+    cap_mono, file_ = await self.__prepare_file(file_, dirpath)
+    if cap_mono is None or file_ is None:
+        # Handle the case where __prepare_file returns None
+        # For example, print an error message and return early
+        print("Error: __prepare_file returned None.")
+        return
+        
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)
     th_html = f"📌 <h4>{ospath.basename(up_path)}</h4><br>📇 <b>Total Screenshots:</b> {ss_no}<br><br>"

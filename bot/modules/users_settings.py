@@ -50,11 +50,11 @@ fname_dict = {'rcc': 'RClone',
              'lprefix': 'Prefix',
              'lsuffix': 'Suffix',
              'lremname': 'Remname',
-             'lmetadata': 'Metadata Edit',
+             'lmetadata': 'Metadata',
              'mprefix': 'Prefix',
              'msuffix': 'Suffix',
              'mremname': 'Remname',
-             'mmetadata': 'Metadata Edit',
+             'mmetadata': 'Metadata',
              'ldump': 'User Dump',
              'lcaption': 'Caption',
              'thumb': 'Thumbnail',
@@ -126,7 +126,7 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         mremname = 'Not Exists' if (val:=user_dict.get('mremname', config_dict.get('MIRROR_FILENAME_REMNAME', ''))) == '' else val
 
         buttons.ibutton("Metadata Edit", f"userset {user_id} mmetadata")
-        mmetadata = 'Not Exists' if (val:=user_dict.get('mmetadata', config_dict.get('MIRROR_FILENAME_METADATA_EDIT', ''))) == '' else val
+        mmetadata = 'Not Exists' if (val:=user_dict.get('mmetadata', config_dict.get('MIRROR_FILENAME_METADATA', ''))) == '' else val
                
         ddl_serv = len(val) if (val := user_dict.get('ddl_servers', False)) else 0
         buttons.ibutton("DDL Servers", f"userset {user_id} ddl_servers")
@@ -175,7 +175,7 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         lremname = 'Not Exists' if (val:=user_dict.get('lremname', config_dict.get('LEECH_FILENAME_REMNAME', ''))) == '' else val
         buttons.ibutton(f"{'✅️' if lremname != 'Not Exists' else ''} Leech Remname", f"userset {user_id} lremname")
                 
-        lmetadata = 'Not Exists' if (val:=user_dict.get('lmetadata', config_dict.get('LEECH_FILENAME_METADATA_EDIT', ''))) == '' else val
+        lmetadata = 'Not Exists' if (val:=user_dict.get('lmetadata', config_dict.get('LEECH_FILENAME_METADATA', ''))) == '' else val
         buttons.ibutton(f"{'✅️' if lmetadata != 'Not Exists' else ''} Metadata Edit", f"userset {user_id} lmetadata")
 
         buttons.ibutton("Leech Dump", f"userset {user_id} ldump")
@@ -299,7 +299,7 @@ async def user_settings(client, message):
     /cmd -s lsuffix
 ➲ <b>Leech Filename Remname :</b>
     /cmd -s lremname
-➲ <b>Leech Filename Metadata Edit :</b>
+➲ <b>Leech Filename Metadata :</b>
     /cmd -s lmetadata
 ➲ <b>Leech Filename Caption :</b>
     /cmd -s lcaption

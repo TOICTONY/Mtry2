@@ -366,13 +366,16 @@ async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
     if metadata:
         # Change metadata title using FFMPEG
         modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
-        new_file = await change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)
+        new_file = await change_metadata_title(user_id, file_)
         if new_file:
             file_ = new_file
 
     if cap_mono is None or file_ is None:
         print("Error: __prepare_file returned None.")
         return
+
+    # Call format_filename with the metadata argument
+    file_, cap_mono = await format_filename(file_, user_id, dirpath=dirpath, metadata=metadata)
         
 
 async def get_ss(up_path, ss_no):

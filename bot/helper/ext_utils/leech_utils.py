@@ -360,12 +360,10 @@ async def change_metadata_title(user_id, file_):
         os.rename(f"{file_}.tmp", file_)
         return file_
 
-
-async def upload(self, user_id, file_, dirpath, metadata=False):  # Modify function signature
-    cap_mono, file_ = await self.__prepare_file(file_, dirpath, metadata=metadata)  # Pass metadata parameter
+async def upload(self, user_id, file_, dirpath, metadata):  # Add metadata parameter
+    cap_mono, file_ = await self.__prepare_file(file_, dirpath)
     if metadata:
         # Change metadata title using FFMPEG
-        modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
         new_file = await change_metadata_title(user_id, file_)
         if new_file:
             file_ = new_file

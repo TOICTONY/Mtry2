@@ -368,9 +368,17 @@ async def upload(self, user_id, file_, dirpath, metadata):  # Add metadata param
 
     # If metadata is requested, edit the metadata before further processing
     if metadata:
-        new_file = await change_metadata_title(user_id, file_)
-        if new_file:
-            file_ = new_file
+        # Leech the file first
+        leech_success = await leech_file(file_, dirpath)
+
+        # If leeching is successful, proceed with metadata editing
+        if leech_success:
+            new_file = await change_metadata_title(user_id, file_)
+            if new_file:
+                file_ = new_file
+        else:
+            print("Error: File leeching failed.")
+            return
 
     # Now, proceed with formatting the filename
     file_, cap_mono = await format_filename(file_, user_id, dirpath=dirpath, metadata=metadata)

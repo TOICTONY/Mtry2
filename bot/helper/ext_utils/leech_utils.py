@@ -328,7 +328,7 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
     
     async def leech_file(user_id, file):
-    if condition:
+    if metadata:
     metadata_edit = user_settings[user_id].get('lmetadata')
     # More code here
     

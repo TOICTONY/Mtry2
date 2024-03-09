@@ -378,6 +378,7 @@ async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
     if cap_mono is None or file_ is None:
         print("Error: __prepare_file returned None.")
         return
+        
 
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)

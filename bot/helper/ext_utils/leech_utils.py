@@ -328,14 +328,13 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
    
-   async def leech_file(user_id, file_, metadata=False):
     if metadata:
         modified_video_name, modified_audio_name, modified_subtitle_name, file_ = await change_metadata_title(user_id, file_)
 
 async def change_metadata_title(user_id, file_):
     # Define the FFMPEG command to change metadata title
     ffmpeg_cmd = [
-        "ffmpeg", "-i", file_,
+        "ffmpeg", "-i", file_, "-map0"
         "-metadata", f"title={modified_video_name}",
         "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
         "-y", f"{file_}.tmp"
@@ -354,7 +353,7 @@ async def change_metadata_title(user_id, file_):
         # FFMPEG command succeeded, rename the file
         os.rename(f"{file_}.tmp", file_)
         return file_
-
+        
     if metadata:
         # Change metadata title using FFMPEG
         new_file = await change_metadata_title(file_, user_id)

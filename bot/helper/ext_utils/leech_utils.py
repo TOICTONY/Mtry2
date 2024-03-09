@@ -1,3 +1,5 @@
+import os
+import asyncio
 from hashlib import md5
 from time import strftime, gmtime, time
 from re import sub as re_sub, search as re_search
@@ -336,12 +338,12 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
 async def change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name):
     # Define the FFMPEG command to change metadata title
     ffmpeg_cmd = ["ffmpeg", "-i", file_, "-map", "0",
-    "-metadata", f"title={modified_video_name}",
-    "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
-    "-y", f"{file_}.tmp"
-    ]
+                  "-metadata", f"title={modified_video_name}",
+                  "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
+                  "-y", f"{file_}.tmp"
+                  ]
 
-    process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
+    process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=asyncio.PIPE)
     _, stderr = await process.communicate()
 
     if process.returncode != 0:

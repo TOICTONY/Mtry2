@@ -336,12 +336,10 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
 async def change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name):
     # Define the FFMPEG command to change metadata title
     ffmpeg_cmd = [
-        "ffmpeg", "-i", file_, "-map", "0",
-        "-metadata", f"title={modified_video_name}",
-        "-metadata", f"title={modified_audio_name}",
-        "-metadata", f"title={modified_subtitle_name}",
-        "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
-        "-y", f"{file_}.tmp"
+    "ffmpeg", "-i", file_, "-map", "0",
+    "-metadata", f"title={modified_video_name}",
+    "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
+    "-y", f"{file_}.tmp"
     ]
 
     # Execute FFMPEG command asynchronously

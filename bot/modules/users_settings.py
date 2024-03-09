@@ -121,8 +121,8 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         buttons.ibutton("Mirror Remname", f"userset {user_id} mremname")
         mremname = 'Not Exists' if (val:=user_dict.get('mremname', config_dict.get('MIRROR_FILENAME_REMNAME', ''))) == '' else val
 
-        buttons.ibutton("Mirror Metadata", f"userset {user_id} mmetadata")
-        mremname = 'Not Exists' if (val:=user_dict.get('mmetadata', config_dict.get('MIRROR_FILENAME_METADATA_EDIT', ''))) == '' else val
+        buttons.ibutton("Metadata Edit", f"userset {user_id} mmetadata")
+        mmetadata = 'Not Exists' if (val:=user_dict.get('mmetadata', config_dict.get('MIRROR_FILENAME_METADATA_EDIT', ''))) == '' else val
                
         ddl_serv = len(val) if (val := user_dict.get('ddl_servers', False)) else 0
         buttons.ibutton("DDL Servers", f"userset {user_id} ddl_servers")
@@ -172,7 +172,7 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         buttons.ibutton(f"{'✅️' if lremname != 'Not Exists' else ''} Leech Remname", f"userset {user_id} lremname")
                 
         lmetadata = 'Not Exists' if (val:=user_dict.get('lmetadata', config_dict.get('LEECH_FILENAME_METADATA_EDIT', ''))) == '' else val
-        buttons.ibutton(f"{'✅️' if lremname != 'Not Exists' else ''} Leech Metadata", f"userset {user_id} lmetadata")
+        buttons.ibutton(f"{'✅️' if lmetadata != 'Not Exists' else ''} Metadata Edit", f"userset {user_id} lmetadata")
 
         buttons.ibutton("Leech Dump", f"userset {user_id} ldump")
         ldump = 'Not Exists' if (val:=user_dict.get('ldump', '')) == '' else len(val)

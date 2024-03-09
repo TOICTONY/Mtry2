@@ -362,17 +362,17 @@ async def change_metadata_title(user_id, file_):
 
 async def upload(self, user_id, file_, dirpath, metadata):  # Add metadata parameter
     cap_mono, file_ = await self.__prepare_file(file_, dirpath)
-    if metadata:
-        # Change metadata title using FFMPEG
-        new_file = await change_metadata_title(user_id, file_)
-        if new_file:
-            file_ = new_file
-
     if cap_mono is None or file_ is None:
         print("Error: __prepare_file returned None.")
         return
 
-    # Call format_filename with the metadata argument
+    # If metadata is requested, edit the metadata before further processing
+    if metadata:
+        new_file = await change_metadata_title(user_id, file_)
+        if new_file:
+            file_ = new_file
+
+    # Now, proceed with formatting the filename
     file_, cap_mono = await format_filename(file_, user_id, dirpath=dirpath, metadata=metadata)
 
     # The rest of your upload function logic goes here...

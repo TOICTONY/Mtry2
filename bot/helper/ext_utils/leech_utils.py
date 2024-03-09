@@ -7,6 +7,7 @@ from os import path as ospath
 from aiofiles.os import remove as aioremove, path as aiopath, mkdir, makedirs, listdir
 from aioshutil import rmtree as aiormtree
 from contextlib import suppress
+import asyncio
 from asyncio import create_subprocess_exec, create_task, gather, Semaphore
 from asyncio.subprocess import PIPE
 from telegraph import upload_file
@@ -335,12 +336,12 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
 
 async def change_metadata_title(user_id, file_):
     # Define the FFMPEG command to change metadata title
-    metadata = "@smile_upload"
+    metadata = f"@smile_upload"
     ffmpeg_cmd = [
         "ffmpeg", "-i", file_, "-map", "0",
-        "-metadata", f"title={metadata}",
-        "-metadata", f"title={metadata}",
-        "-metadata", f"title={metadata}",
+        "-metadata:s:s", f"title={metadata}",
+        "-metadata:s:v", f"title={metadata}",
+        "-metadata:s:a", f"title={metadata}",
         "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
         "-y", f"{file_}.tmp"
     ]

@@ -328,7 +328,8 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
    
     if metadata:
-        modified_video_name, modified_audio_name, modified_subtitle_name, file_ = await change_metadata_title(user_id, file_)
+        modified_video_name, modified_audio_name, modified_subtitle_name = await change_metadata_title(user_id, file_)
+        file_ = await leech_file(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)
 
     return file_, cap_mono  # Return file_ and cap_mono regardless of the metadata flag
 
@@ -357,13 +358,6 @@ async def change_metadata_title(user_id, file_, modified_video_name, modified_au
         os.rename(f"{file_}.tmp", file_)
         return file_
 
-await leech_file(user_id, file_)
-    if metadata:
-        modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
-        file_ = await change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)
-
-    return file_, cap_mono  # Return file_ and cap_mono regardless of the metadata flag
-
 async def get_modified_metadata_names(user_id):
     # Here you can implement the logic to get modified metadata names based on user_id
     # For example, querying a database or processing some user-specific data
@@ -385,7 +379,6 @@ async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
         print("Error: __prepare_file returned None.")
         return
 
-        
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)
     th_html = f"📌 <h4>{ospath.basename(up_path)}</h4><br>📇 <b>Total Screenshots:</b> {ss_no}<br><br>"

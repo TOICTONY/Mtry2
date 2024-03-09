@@ -382,6 +382,11 @@ async def upload(self, user_id, file_, dirpath, metadata=False):
         if new_file:
             file_ = new_file
 
+    # Proceed with the upload process using the modified file path
+    # Example:
+    # await self.upload_file_to_server(file_)
+
+
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)
     th_html = f"📌 <h4>{ospath.basename(up_path)}</h4><br>📇 <b>Total Screenshots:</b> {ss_no}<br><br>"

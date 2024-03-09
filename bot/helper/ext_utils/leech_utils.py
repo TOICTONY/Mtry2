@@ -328,7 +328,10 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
     
     async def leech_file(user_id, file):
+    if condition:
     metadata_edit = user_settings[user_id].get('lmetadata')
+    # More code here
+    
     if metadata_edit:
         # Modify file names based on metadata
         modified_video_name = file.video_name + " - " + metadata_edit

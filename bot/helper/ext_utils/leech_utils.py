@@ -327,10 +327,25 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
 
-    if lmetadata:
-        file_ = f"{file_} [{lmetadata}]"
+    def leech_file(user_id, file):
+    metadata_edit = user_settings[user_id].get('lmetadata')
+    if metadata_edit:
+        # Modify file names based on metadata
+        modified_video_name = file.video_name + " - " + metadata_edit
+        modified_audio_name = file.audio_name + " - " + metadata_edit
+        modified_subtitle_name = file.subtitle_name + " - " + metadata_edit
+        # Do further processing or output customization as needed
+    else:
+        # Use default file names if no metadata provided
+        modified_video_name = file.video_name
+        modified_audio_name = file.audio_name
+        modified_subtitle_name = file.subtitle_name
 
-    return file_, cap_mono
+    # Append metadata to file name
+    file_ = f"{file_} [{metadata_edit}]" if metadata_edit else file_
+
+    # Return modified file names
+    return modified_video_name, modified_audio_name, modified_subtitle_name, file_, cap_mono
 
 
 async def get_ss(up_path, ss_no):

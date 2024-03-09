@@ -326,6 +326,10 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                 elif len(args) == 1:
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
+
+    if lmetadata:
+        file_ = f"{file_} [{lmetadata}]"
+
     return file_, cap_mono
 
 

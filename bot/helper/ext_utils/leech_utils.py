@@ -1,9 +1,3 @@
-import json
-import re
-import hashlib
-import os
-from asyncio.subprocess import PIPE, create_subprocess_exec
-from asyncio import gather, Semaphore
 from hashlib import md5
 from time import strftime, gmtime, time
 from re import sub as re_sub, search as re_search
@@ -13,6 +7,8 @@ from os import path as ospath
 from aiofiles.os import remove as aioremove, path as aiopath, mkdir, makedirs, listdir
 from aioshutil import rmtree as aiormtree
 from contextlib import suppress
+from asyncio import create_subprocess_exec, create_task, gather, Semaphore
+from asyncio.subprocess import PIPE
 from telegraph import upload_file
 from langcodes import Language
 
@@ -32,16 +28,19 @@ async def is_multi_streams(path):
     except Exception as e:
         LOGGER.error(f'Get Video Streams: {e}. Mostly File not found!')
         return False
-    
-    try:
-        data = json.loads(result[0])
-        streams = data.get('streams', [])
-        videos = sum(1 for stream in streams if stream.get('codec_type') == 'video')
-        audios = sum(1 for stream in streams if stream.get('codec_type') == 'audio')
-        return videos > 1 or audios > 1
-    except json.JSONDecodeError as e:
-        LOGGER.error(f'Error parsing JSON: {e}')
+    fields = eval(result[0]).get('streams')
+    if fields is None:
+        LOGGER.error(f"get_video_streams: {result}")
         return False
+    videos = 0
+    audios = 0
+    for stream in fields:
+        if stream.get('codec_type') == 'video':
+            videos += 1
+        elif stream.get('codec_type') == 'audio':
+            audios += 1
+    return videos > 1 or audios > 1
+
 
 async def get_media_info(path, metadata=False):
     try:
@@ -52,39 +51,34 @@ async def get_media_info(path, metadata=False):
     except Exception as e:
         LOGGER.error(f'Media Info: {e}. Mostly File not found!')
         return (0, "", "", "") if metadata else (0, None, None)
-
-    try:
-        data = json.loads(result[0])
-        fields = data.get('format', {})
-        duration = round(float(fields.get('duration', 0)))
-
-        if metadata:
-            lang, qual, stitles = "", "", ""
-            streams = data.get('streams', [])
-            for stream in streams:
-                codec_type = stream.get('codec_type')
-                if codec_type == 'video':
-                    qual = int(stream.get('height'))
-                    qual = f"{480 if qual <= 480 else 540 if qual <= 540 else 720 if qual <= 720 else 1080 if qual <= 1080 else 2160 if qual <= 2160 else 4320 if qual <= 4320 else 8640}p"
-                    for lang_tag in stream.get('tags', {}).get('language', []):
-                        lc = Language.get(lang_tag, None)
-                        if lc:
-                            lang += f"{lc.display_name()}, "
-                elif codec_type == 'subtitle':
-                    for lang_tag in stream.get('tags', {}).get('language', []):
-                        st = Language.get(lang_tag, None)
-                        if st:
-                            stitles += f"{st.display_name()}, "
-            return duration, qual, lang[:-2], stitles[:-2]
-
-        tags = fields.get('tags', {})
-        artist = tags.get('artist') or tags.get('ARTIST') or tags.get("Artist")
-        title = tags.get('title') or tags.get('TITLE') or tags.get("Title")
-        return duration, artist, title
-
-    except json.JSONDecodeError as e:
-        LOGGER.error(f'Error parsing JSON: {e}')
+    ffresult = eval(result[0])
+    fields = ffresult.get('format')
+    if fields is None:
+        LOGGER.error(f"Media Info Sections: {result}")
         return (0, "", "", "") if metadata else (0, None, None)
+    duration = round(float(fields.get('duration', 0)))
+    if metadata:
+        lang, qual, stitles = "", "", ""
+        if (streams := ffresult.get('streams')) and streams[0].get('codec_type') == 'video':
+            qual = int(streams[0].get('height'))
+            qual = f"{480 if qual <= 480 else 540 if qual <= 540 else 720 if qual <= 720 else 1080 if qual <= 1080 else 2160 if qual <= 2160 else 4320 if qual <= 4320 else 8640}p"
+            for stream in streams:
+                if stream.get('codec_type') == 'audio' and (lc := stream.get('tags', {}).get('language')):
+                    with suppress(Exception):
+                        lc = Language.get(lc).display_name()
+                    if lc not in lang:
+                        lang += f"{lc}, "
+                if stream.get('codec_type') == 'subtitle' and (st := stream.get('tags', {}).get('language')):
+                    with suppress(Exception):
+                        st = Language.get(st).display_name()
+                    if st not in stitles:
+                        stitles += f"{st}, "
+        return duration, qual, lang[:-2], stitles[:-2]
+    tags = fields.get('tags', {})
+    artist = tags.get('artist') or tags.get('ARTIST') or tags.get("Artist")
+    title = tags.get('title') or tags.get('TITLE') or tags.get("Title")
+    return duration, artist, title
+
 
 async def get_document_type(path):
     is_video, is_audio, is_image = False, False, False
@@ -247,6 +241,7 @@ async def split_file(path, size, file_, dirpath, split_size, listener, start_tim
             LOGGER.error(err)
     return True
 
+
 async def format_filename(file_, user_id, dirpath=None, isMirror=False):
     user_dict = user_data.get(user_id, {})
     ftag, ctag = ('m', 'MIRROR') if isMirror else ('l', 'LEECH')
@@ -333,21 +328,25 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
    
-   if metadata:
-        modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
-        file_, cap_mono = await change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)
+    if metadata:
+        file_ = await change_metadata_title(user_id, file_)
 
-    return file_, cap_mono
+    return file_, cap_mono  # Return file_ and cap_mono regardless of the metadata flag
 
-async def change_metadata_title(file_, modified_video_name, modified_audio_name, modified_subtitle_name=None):
+async def change_metadata_title(user_id, file_):
     # Define the FFMPEG command to change metadata title
-    ffmpeg_cmd = ["ffmpeg", "-i", file_, "-map", "0",
-                  "-metadata", f"title={modified_video_name}",
-                  "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
-                  "-y", f"{file_}.tmp"
-                  ]
+    metadata = "@smile_upload"
+    ffmpeg_cmd = [
+        "ffmpeg", "-i", file_, "-map", "0",
+        "-metadata", f"title={metadata}",
+        "-metadata", f"title={metadata}",
+        "-metadata", f"title={metadata}",
+        "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
+        "-y", f"{file_}.tmp"
+    ]
 
-    process = await create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
+    # Execute FFMPEG command asynchronously
+    process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
     _, stderr = await process.communicate()
 
     if process.returncode != 0:
@@ -361,31 +360,19 @@ async def change_metadata_title(file_, modified_video_name, modified_audio_name,
         return file_
 
 
-async def get_modified_metadata_names(user_id):
-    # Here you can implement the logic to get modified metadata names based on user_id
-    # For example, querying a database or processing some user-specific data
-    modified_video_name = "Modified Video Name"
-    modified_audio_name = "Modified Audio Name"
-    modified_subtitle_name = "Modified Subtitle Name"
-    return modified_video_name, modified_audio_name, modified_subtitle_name
-
-async def upload(self, user_id, file_, dirpath, metadata=False):
-    cap_mono, new_file = await self.__prepare_file(file_, dirpath)
-    
-    if cap_mono is None or new_file is None:
-        LOGGER.error("Error: __prepare_file returned None.")
-        return
-
+async def upload(self, user_id, file_, dirpath):  # Add user_id parameter
+    cap_mono, file_ = await self.__prepare_file(file_, dirpath)
     if metadata:
+        # Change metadata title using FFMPEG
         modified_video_name, modified_audio_name, modified_subtitle_name = await get_modified_metadata_names(user_id)
-        new_file = await change_metadata_title(new_file, modified_video_name, modified_audio_name, modified_subtitle_name)
+        new_file = await change_metadata_title(user_id, file_, modified_video_name, modified_audio_name, modified_subtitle_name)
         if new_file:
             file_ = new_file
 
-    # Proceed with the upload process using the modified file path
-    # Example:
-    # await self.upload_file_to_server(file_)
-
+    if cap_mono is None or file_ is None:
+        print("Error: __prepare_file returned None.")
+        return
+        
 
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)

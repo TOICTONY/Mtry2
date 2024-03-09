@@ -334,14 +334,13 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
 
     return file_, cap_mono  # Return file_ and cap_mono regardless of the metadata flag
 
-async def change_metadata_title(user_id, file_):
+async def change_metadata_title(user_id, file_, custom_metadata):
     # Define the FFMPEG command to change metadata title
-    metadata = f"@smile_upload"
     ffmpeg_cmd = [
         "ffmpeg", "-i", file_, "-map", "0",
-        "-metadata:s:s", f"title={metadata}",
-        "-metadata:s:v", f"title={metadata}",
-        "-metadata:s:a", f"title={metadata}",
+        "-metadata:s:s", f"title={custom_metadata}",
+        "-metadata:s:v", f"title={custom_metadata}",
+        "-metadata:s:a", f"title={custom_metadata}",
         "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
         "-y", f"{file_}.tmp"
     ]
@@ -360,7 +359,7 @@ async def change_metadata_title(user_id, file_):
         os.rename(f"{file_}.tmp", file_)
         return file_
 
-async def upload(self, user_id, file_, dirpath, metadata):  # Add metadata parameter
+async def upload(self, user_id, file_, dirpath, metadata, custom_metadata=None):  # Add custom_metadata parameter
     cap_mono, file_ = await self.__prepare_file(file_, dirpath)
     if cap_mono is None or file_ is None:
         print("Error: __prepare_file returned None.")
@@ -373,7 +372,9 @@ async def upload(self, user_id, file_, dirpath, metadata):  # Add metadata param
 
         # If leeching is successful, proceed with metadata editing
         if leech_success:
-            new_file = await change_metadata_title(user_id, file_)
+            # Use custom metadata if provided, else use default
+            metadata_title = custom_metadata if custom_metadata else f"@smile_upload"
+            new_file = await change_metadata_title(user_id, file_, metadata_title)
             if new_file:
                 file_ = new_file
         else:

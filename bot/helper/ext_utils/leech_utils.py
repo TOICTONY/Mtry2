@@ -326,6 +326,7 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
                 elif len(args) == 1:
                     cap_mono = cap_mono.replace(args[0], '')
         cap_mono = cap_mono.replace('%%', '|').replace('&%&', '{').replace('$%$', '}')
+        return file_, cap_mono
     
     async def leech_file(user_id, file):
     if metadata:
@@ -334,15 +335,15 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
     
     if metadata_edit:
         # Modify file names based on metadata
-        modified_video_name = file.video_name + " - " + metadata_edit
-        modified_audio_name = file.audio_name + " - " + metadata_edit
-        modified_subtitle_name = file.subtitle_name + " - " + metadata_edit
+        modified_video_title_name = file.video_title + " - " + metadata_edit
+        modified_audio_title_name = file.audio_title + " - " + metadata_edit
+        modified_subtitle_title_name = file.subtitle_tile + " - " + metadata_edit
         # Do further processing or output customization as needed
     else:
         # Use default file names if no metadata provided
-        modified_video_name = file.video_name
-        modified_audio_name = file.audio_name
-        modified_subtitle_name = file.subtitle_name
+        modified_video_title_name = file.video_title
+        modified_audio_title_name = file.audio_title
+        modified_subtitle_title_name = file.subtitle_title
 
     # Append metadata to file name
     file_ = f"{file_} [{metadata_edit}]" if metadata_edit else file_

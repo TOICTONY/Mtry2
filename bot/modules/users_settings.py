@@ -138,7 +138,7 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
         user_tds = len(val) if (val := user_dict.get('user_tds', False)) else 0
         buttons.ibutton("User TDs", f"userset {user_id} user_tds")
 
-        text = BotTheme('MIRROR', NAME=name, RCLONE=rccmsg, DDL_SERVER=ddl_serv, DM=f"{dailyup} / {dailytlup}", MREMNAME=escape(mremname), MPREFIX=escape(mprefix),
+        text = BotTheme('MIRROR', NAME=name, RCLONE=rccmsg, DDL_SERVER=ddl_serv, DM=f"{dailyup} / {dailytlup}", MREMNAME=escape(mremname), MMETADATA=escape(mmetadata), MPREFIX=escape(mprefix),
                 MSUFFIX=escape(msuffix), TMODE=tds_mode, USERTD=user_tds)
 
         buttons.ibutton("Back", f"userset {user_id} back", "footer")
@@ -185,7 +185,7 @@ async def get_user_settings(from_user, key=None, edit_type=None, edit_mode=None)
                 LTYPE=ltype, THUMB=thumbmsg, SPLIT_SIZE=split_size,
                 EQUAL_SPLIT=equal_splits, MEDIA_GROUP=media_group,
                 LCAPTION=escape(lcaption), LPREFIX=escape(lprefix),
-                LSUFFIX=escape(lsuffix), LDUMP=ldump, LREMNAME=escape(lremname))
+                LSUFFIX=escape(lsuffix), LDUMP=ldump, LREMNAME=escape(lremname), LMETADATA=escape(lmetadata))
 
         buttons.ibutton("Back", f"userset {user_id} back", "footer")
         buttons.ibutton("Close", f"userset {user_id} close", "footer")

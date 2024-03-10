@@ -287,12 +287,11 @@ class TgUploader:
                 LOGGER.error(f"Failed To Send in User Dump:\n{str(err)}")
 
     async def upload(self, o_files, m_size, size):
-    await self.__user_settings()  # Ensure proper indentation here
+    await self.__user_settings()
     res = await self.__msg_to_reply()
     if not res:
         return
     isDeleted = False
-    # Other code follows...
     for dirpath, _, files in sorted(await sync_to_async(walk, self.__path)):
         if dirpath.endswith('/yt-dlp-thumb'):
             continue
@@ -314,15 +313,6 @@ class TgUploader:
                     return
                 self.__prm_media = True if f_size > 2097152000 else False
                 cap_mono, file_ = await self.__prepare_file(file_, dirpath)
-                
-                # Modify metadata before upload
-                new_file = await change_metadata_title(self.__user_id, file_)
-                if new_file:
-                    file_ = new_file
-                else:
-                    # Metadata modification failed, skip this file
-                    continue
-                
                 if self.__last_msg_in_group:
                     group_lists = [x for v in self.__media_dict.values()
                                    for x in v.keys()]
@@ -334,7 +324,6 @@ class TgUploader:
                 self.__last_msg_in_group = False
                 self.__last_uploaded = 0
                 await self.__switching_client()
-                await self.__upload_file(cap_mono, file_)
                 if self.__leechmsg and not isDeleted and config_dict['CLEAN_LOG_MSG']:
                     await deleteMessage(list(self.__leechmsg.values())[0])
                     isDeleted = True
@@ -375,6 +364,7 @@ class TgUploader:
         return
     LOGGER.info(f"Leech Completed: {self.name}")
     await self.__listener.onUploadComplete(None, size, self.__msgs_dict, self.__total_files, self.__corrupted, self.name)
+
 
     @retry(wait=wait_exponential(multiplier=2, min=4, max=8), stop=stop_after_attempt(3),
            retry=retry_if_exception_type(Exception))

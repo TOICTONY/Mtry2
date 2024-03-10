@@ -359,8 +359,8 @@ async def change_metadata_title(user_id, file_, custom_metadata):
         os.rename(f"{file_}.tmp", file_)
         return file_
 
-async def upload(self, user_id, o_file, dirpath, metadata, custom_metadata=None):  # Add custom_metadata parameter
-    cap_mono, o_file = await self.__prepare_file(o_file, dirpath)
+async def upload(self, user_id, file_, dirpath, metadata, custom_metadata=None):  # Add custom_metadata parameter
+    cap_mono, file_ = await self.__prepare_file(file_, dirpath)
     if cap_mono is None or file_ is None:
         print("Error: __prepare_file returned None.")
         return

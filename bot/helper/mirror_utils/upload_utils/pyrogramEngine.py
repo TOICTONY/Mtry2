@@ -286,8 +286,7 @@ class TgUploader:
             if not self.__is_cancelled:
                 LOGGER.error(f"Failed To Send in User Dump:\n{str(err)}")
 
-   async def __upload(self, o_files, file_, m_size, size):
-    # Your function implementation here
+   async def upload(self, o_files, file_, m_size, size):
     await self.__user_settings()
     res = await self.__msg_to_reply()
     if not res:

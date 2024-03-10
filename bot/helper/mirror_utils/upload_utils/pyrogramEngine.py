@@ -286,84 +286,84 @@ class TgUploader:
             if not self.__is_cancelled:
                 LOGGER.error(f"Failed To Send in User Dump:\n{str(err)}")
 
-   async def upload(self, o_files, file_, m_size, size):
-    await self.__user_settings()
-    res = await self.__msg_to_reply()
-    if not res:
-        return
-    isDeleted = False
-    for dirpath, _, files in sorted(await sync_to_async(walk, self.__path)):
-        if dirpath.endswith('/yt-dlp-thumb'):
-            continue
-        for file_ in natsorted(files):
-            self.__up_path = ospath.join(dirpath, file_)
-            if file_.lower().endswith(tuple(GLOBAL_EXTENSION_FILTER)):
-                await aioremove(self.__up_path)
+    async def upload(self, o_files, file_, m_size, size):
+        await self.__user_settings()
+        res = await self.__msg_to_reply()
+        if not res:
+            return
+        isDeleted = False
+        for dirpath, _, files in sorted(await sync_to_async(walk, self.__path)):
+            if dirpath.endswith('/yt-dlp-thumb'):
                 continue
-            try:
-                f_size = await aiopath.getsize(self.__up_path)
-                if self.__listener.seed and file_ in o_files and f_size in m_size:
-                    continue
-                self.__total_files += 1
-                if f_size == 0:
-                    LOGGER.error(f"{self.__up_path} size is zero, telegram don't upload zero size files")
-                    self.__corrupted += 1
-                    continue
-                if self.__is_cancelled:
-                    return
-                self.__prm_media = True if f_size > 2097152000 else False
-                cap_mono, file_ = await self.__prepare_file(file_, dirpath)
-                if self.__last_msg_in_group:
-                    group_lists = [x for v in self.__media_dict.values()
-                                   for x in v.keys()]
-                    if (match := re_match(r'.+(?=\.0*\d+$)|.+(?=\.part\d+\..+)', self.__up_path)) and match.group(0) not in group_lists:
-                        for key, value in list(self.__media_dict.items()):
-                            for subkey, msgs in list(value.items()):
-                                if len(msgs) > 1:
-                                    await self.__send_media_group(subkey, key, msgs)
-                self.__last_msg_in_group = False
-                self.__last_uploaded = 0
-                await self.__switching_client()
-                if self.__leechmsg and not isDeleted and config_dict['CLEAN_LOG_MSG']:
-                    await deleteMessage(list(self.__leechmsg.values())[0])
-                    isDeleted = True
-                if self.__is_cancelled:
-                    return
-                if not self.__is_corrupted and (self.__listener.isSuperGroup or config_dict['LEECH_LOG_ID']):
-                    self.__msgs_dict[self.__sent_msg.link] = file_
-                await sleep(1)
-            except Exception as err:
-                if isinstance(err, RetryError):
-                    LOGGER.info(f"Total Attempts: {err.last_attempt.attempt_number}")
-                else:
-                    LOGGER.error(f"{format_exc()}. Path: {self.__up_path}")
-                if self.__is_cancelled:
-                    return
-                continue
-            finally:
-                if not self.__is_cancelled and await aiopath.exists(self.__up_path) and \
-                    (not self.__listener.seed or self.__listener.newDir or
-                     dirpath.endswith("/splited_files_mltb") or '/copied_mltb/' in self.__up_path):
+            for file_ in natsorted(files):
+                self.__up_path = ospath.join(dirpath, file_)
+                if file_.lower().endswith(tuple(GLOBAL_EXTENSION_FILTER)):
                     await aioremove(self.__up_path)
-    for key, value in list(self.__media_dict.items()):
-        for subkey, msgs in list(value.items()):
-            if len(msgs) > 1:
-                await self.__send_media_group(subkey, key, msgs)
-    if self.__is_cancelled:
-        return
-    if self.__listener.seed and not self.__listener.newDir:
-        await clean_unwanted(self.__path)
-    if self.__total_files == 0:
-        await self.__listener.onUploadError("No files to upload. In case you have filled EXTENSION_FILTER, then check if all files have those extensions or not.")
-        return
-    if self.__total_files <= self.__corrupted:
-        await self.__listener.onUploadError('Files Corrupted or unable to upload. Check logs!')
-        return
-    if self.__retry_error:
-        await self.__listener.onUploadError('Unknown Error Occurred. Check logs & Contact Bot Owner!')
-        return
-    LOGGER.info(f"Leech Completed: {self.name}")
-    await self.__listener.onUploadComplete(None, size, self.__msgs_dict, self.__total_files, self.__corrupted, self.name)
+                    continue
+                try:
+                    f_size = await aiopath.getsize(self.__up_path)
+                    if self.__listener.seed and file_ in o_files and f_size in m_size:
+                        continue
+                    self.__total_files += 1
+                    if f_size == 0:
+                        LOGGER.error(f"{self.__up_path} size is zero, telegram don't upload zero size files")
+                        self.__corrupted += 1
+                        continue
+                    if self.__is_cancelled:
+                        return
+                    self.__prm_media = True if f_size > 2097152000 else False
+                    cap_mono, file_ = await self.__prepare_file(file_, dirpath)
+                    if self.__last_msg_in_group:
+                        group_lists = [x for v in self.__media_dict.values()
+                                       for x in v.keys()]
+                        if (match := re_match(r'.+(?=\.0*\d+$)|.+(?=\.part\d+\..+)', self.__up_path)) and match.group(0) not in group_lists:
+                            for key, value in list(self.__media_dict.items()):
+                                for subkey, msgs in list(value.items()):
+                                    if len(msgs) > 1:
+                                        await self.__send_media_group(subkey, key, msgs)
+                    self.__last_msg_in_group = False
+                    self.__last_uploaded = 0
+                    await self.__switching_client()
+                    if self.__leechmsg and not isDeleted and config_dict['CLEAN_LOG_MSG']:
+                        await deleteMessage(list(self.__leechmsg.values())[0])
+                        isDeleted = True
+                    if self.__is_cancelled:
+                        return
+                    if not self.__is_corrupted and (self.__listener.isSuperGroup or config_dict['LEECH_LOG_ID']):
+                        self.__msgs_dict[self.__sent_msg.link] = file_
+                    await sleep(1)
+                except Exception as err:
+                    if isinstance(err, RetryError):
+                        LOGGER.info(f"Total Attempts: {err.last_attempt.attempt_number}")
+                    else:
+                        LOGGER.error(f"{format_exc()}. Path: {self.__up_path}")
+                    if self.__is_cancelled:
+                        return
+                    continue
+                finally:
+                    if not self.__is_cancelled and await aiopath.exists(self.__up_path) and \
+                        (not self.__listener.seed or self.__listener.newDir or
+                         dirpath.endswith("/splited_files_mltb") or '/copied_mltb/' in self.__up_path):
+                        await aioremove(self.__up_path)
+        for key, value in list(self.__media_dict.items()):
+            for subkey, msgs in list(value.items()):
+                if len(msgs) > 1:
+                    await self.__send_media_group(subkey, key, msgs)
+        if self.__is_cancelled:
+            return
+        if self.__listener.seed and not self.__listener.newDir:
+            await clean_unwanted(self.__path)
+        if self.__total_files == 0:
+            await self.__listener.onUploadError("No files to upload. In case you have filled EXTENSION_FILTER, then check if all files have those extensions or not.")
+            return
+        if self.__total_files <= self.__corrupted:
+            await self.__listener.onUploadError('Files Corrupted or unable to upload. Check logs!')
+            return
+        if self.__retry_error:
+            await self.__listener.onUploadError('Unknown Error Occurred. Check logs & Contact Bot Owner!')
+            return
+        LOGGER.info(f"Leech Completed: {self.name}")
+        await self.__listener.onUploadComplete(None, size, self.__msgs_dict, self.__total_files, self.__corrupted, self.name)
 
 
     @retry(wait=wait_exponential(multiplier=2, min=4, max=8), stop=stop_after_attempt(3),

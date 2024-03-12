@@ -373,10 +373,11 @@ async def upload(self, user_id, file_, dirpath, metadata, custom_metadata=None):
         # If leeching is successful, proceed with metadata editing
         if leech_success:
             # Use custom metadata if provided, else use default
-            metadata_title = custom_metadata if custom_metadata else f"@smile_upload"
-            new_file = await change_metadata_title(user_id, file_, metadata_title)
-            if new_file:
-                file_ = new_file
+            metadata_title = custom_metadata
+            file_ = await change_metadata_title(user_id, file_, custom_metadata)
+        if new_file:
+            file_ = new_file
+
         else:
             print("Error: File leeching failed.")
             return

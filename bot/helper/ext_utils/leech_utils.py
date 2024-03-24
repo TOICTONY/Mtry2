@@ -334,61 +334,6 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
 
     return file_, cap_mono  # Return file_ and cap_mono regardless of the metadata flag
 
-async def change_metadata_title(user_id, file_, custom_metadata):
-    # Define the FFMPEG command to change metadata title
-    ffmpeg_cmd = [
-        "ffmpeg", "-i", file_, "-map", "0",
-        "-metadata:s:s", f"title={custom_metadata}",
-        "-metadata:s:v", f"title={custom_metadata}",
-        "-metadata:s:a", f"title={custom_metadata}",
-        "-c:v", "copy", "-c:a", "copy", "-c:s", "copy",
-        "-y", f"{file_}.tmp"
-    ]
-
-    # Execute FFMPEG command asynchronously
-    process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stderr=PIPE)
-    _, stderr = await process.communicate()
-
-    if process.returncode != 0:
-        # FFMPEG command failed, handle the error
-        error_message = stderr.decode().strip()
-        LOGGER.error(f"FFMPEG metadata title change failed: {error_message}")
-        return None
-    else:
-        # FFMPEG command succeeded, rename the file
-        os.rename(f"{file_}.tmp", file_)
-        return file_
-
-async def upload(self, user_id, file_, dirpath, metadata, custom_metadata=None):  # Add custom_metadata parameter
-    cap_mono, file_ = await self.__prepare_file(file_, dirpath)
-    if cap_mono is None or file_ is None:
-        print("Error: __prepare_file returned None.")
-        return
-
-    # If metadata is requested, edit the metadata before further processing
-    if metadata:
-        # Leech the file first
-        leech_success = await leech_file(file_, dirpath)
-
-        # If leeching is successful, proceed with metadata editing
-        if leech_success:
-            # Use custom metadata if provided, else use default
-            metadata_title = custom_metadata
-            file_ = await change_metadata_title(user_id, file_, custom_metadata)
-        if new_file:
-            file_ = new_file
-
-        else:
-            print("Error: File leeching failed.")
-            return
-
-    # Now, proceed with formatting the filename
-    file_, cap_mono = await format_filename(file_, user_id, dirpath=dirpath, metadata=metadata)
-
-    # The rest of your upload function logic goes here...
-    # You can use the modified `file_` and `cap_mono` variables for further processing.
-
-
        
 async def get_ss(up_path, ss_no):
     thumbs_path, tstamps = await take_ss(up_path, total=min(ss_no, 250), gen_ss=True)

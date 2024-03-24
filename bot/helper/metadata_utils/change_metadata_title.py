@@ -4,6 +4,11 @@ from subprocess import PIPE
 
 # Assuming LOGGER, leech_file, and format_filename are defined elsewhere
 
+class MyClass:
+    async def __prepare_file(self, file_, dirpath):
+        # Implementation of __prepare_file method
+        pass
+
 async def change_metadata_title(user_id, file_, custom_metadata):
     # Define the FFMPEG command to change metadata title
     ffmpeg_cmd = [
@@ -29,7 +34,7 @@ async def change_metadata_title(user_id, file_, custom_metadata):
         os.rename(f"{file_}.tmp", file_)
         return file_
 
-async def upload(self, user_id, file_, dirpath, metadata, custom_metadata=None):  
+async def upload(user_id, file_, dirpath, metadata, custom_metadata=None):  
     # Check if self is an instance of MyClass
     if not isinstance(self, MyClass):
         print("Error: 'self' is not an instance of MyClass.")

@@ -58,5 +58,25 @@ async def main():
 
     await upload(user_id, file_, dirpath, metadata, custom_metadata)
 
+# Assuming the __prepare_file method is defined in a class named FileHandler
+class FileHandler:
+    async def __prepare_file(self, file_, dirpath):
+        # Implementation of __prepare_file method
+        pass
+
+async def upload(self, user_id, file_, dirpath, metadata, custom_metadata=None):
+    # Create an instance of FileHandler
+    file_handler = FileHandler()
+
+    # Call __prepare_file method on the instance
+    cap_mono, file_ = await file_handler.__prepare_file(file_, dirpath)
+
+    if cap_mono is None or file_ is None:
+        print("Error: __prepare_file returned None.")
+        return
+
+    # Other code logic...
+
+
 # Ensure to call main() in an asyncio environment
 asyncio.run(main())

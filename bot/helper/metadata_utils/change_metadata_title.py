@@ -34,7 +34,7 @@ async def change_metadata_title(user_id, file_, custom_metadata):
         os.rename(f"{file_}.tmp", file_)
         return file_
 
-async def upload(user_id, file_, dirpath, metadata, custom_metadata=None):  
+async def upload(self, user_id, file_, dirpath, *args):  
     # Check if self is an instance of MyClass
     if not isinstance(self, MyClass):
         print("Error: 'self' is not an instance of MyClass.")
@@ -45,6 +45,10 @@ async def upload(user_id, file_, dirpath, metadata, custom_metadata=None):
     if cap_mono is None or file_ is None:
         print("Error: __prepare_file returned None.")
         return
+
+    # Extract metadata and custom_metadata if provided
+    metadata = args[0] if args else False
+    custom_metadata = args[1] if len(args) > 1 else None
 
     # If metadata is requested, edit the metadata before further processing
     if metadata:
